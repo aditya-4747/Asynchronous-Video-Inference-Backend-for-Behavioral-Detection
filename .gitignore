@@ -1,0 +1,54 @@
+# Virtual environment
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-code files
+__pycache__/
+*.pyc
+*.whl
+
+# IDE-specific files
+.idea/  # For PyCharm or other JetBrains IDEs
+.vscode/ # For VS Code (optional, as some config might be useful to share)
+
+# Build artifacts and packaging
+dist/
+build/
+*.egg-info/
+htmlcov/
+.coverage*
+coverage.xml
+
+# SQLite database files (if used for development/testing)
+*.db
+*.sqlite3
+test_db.db
+
+# Environment variables file (contains secrets)
+.env
+
+# OS and miscellaneous files
+.DS_Store # macOS
+Thumbs.db # Windows
+*~ # temporary files
+
+# MyPy cache
+.mypy_cache/
+
+# Pytest cache
+.pytest_cache/
+
+# Log files
+*.log
+log.txt
+
+# Video/image data
+/data/
+
+# ML model weights
+/model/
+*.pt
