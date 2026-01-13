@@ -1,10 +1,14 @@
 from pydantic import BaseModel
 from typing import List
 
+class SpittingInstance(BaseModel):
+    conf: float
+    box: List
+
 
 class Detection(BaseModel):
     timestamp: float
-    confidence: float
+    instances: List[SpittingInstance]
     frame_key: str
 
 

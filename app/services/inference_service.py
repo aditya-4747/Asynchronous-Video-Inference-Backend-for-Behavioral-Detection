@@ -1,6 +1,8 @@
 from ultralytics import YOLO
 import cv2
 
+from app.models.result import SpittingInstance
+
 class YoloInferenceService:
     def __init__(self, model_path: str):
         self.model = YOLO(model_path)
@@ -10,7 +12,7 @@ class YoloInferenceService:
         Docstring for run
         
         :param video_path: URL of the video
-        :param frame_interval: considers 1 frame for a 30 fps video
+        :param frame_interval (30): considers 1 frame for a 30 fps video
         '''
         cap = cv2.VideoCapture(video_path)
         detections = []
@@ -24,16 +26,24 @@ class YoloInferenceService:
                 break
 
             if frame_idx % frame_interval == 0:
+                timestamp = frame_idx/fps
+                spitting_instances = []
+
                 results = self.model(frame, verbose=False)
 
                 for r in results:
                     for box in r.boxes:
                         cls_id = int(box.cls[0])
                         conf = float(box.conf[0])
+                        x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-                        if cls_id == 0:
-                            timestamp = frame_idx/fps
-                            detections.append((timestamp, conf, frame))
+                        if cls_id == 0 and conf > 0.6:
+                            spitting_instances.append(
+                                SpittingInstance(conf=conf, box=[x1, y1, x2, y2])
+                            )
+                
+                if spitting_instances:
+                    detections.append((timestamp, frame.copy(), spitting_instances))
 
             frame_idx += 1
 

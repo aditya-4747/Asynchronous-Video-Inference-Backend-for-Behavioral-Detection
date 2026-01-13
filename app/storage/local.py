@@ -22,10 +22,13 @@ class LocalStorageService(StorageService):
     def get_access_url(self, key: str) -> str:
         return os.path.join(VIDEO_DIR, key)
     
-    def upload_frame(self, image_bytes: bytes, filename: str) -> str:
-        path = os.path.join(FRAME_DIR, filename)
+    def upload_frame(self, image_bytes: bytes, job_id: str, filename: str) -> str:
+        frame_folder = os.path.join(FRAME_DIR, job_id)
+        os.makedirs(frame_folder, exist_ok=True)
+
+        path = os.path.join(frame_folder, filename)
 
         with open(path, "wb") as f:
             f.write(image_bytes)
 
-        return filename
+        return path

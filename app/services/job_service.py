@@ -4,11 +4,9 @@ from typing import Optional
 import logging
 
 from app.models.job import JobStatus, Job
-from app.models.result import JobResult
 from app.storage.local import LocalStorageService
 
 _JOBS: dict[str, Job] = {}
-_RESULTS: dict[str, JobResult] = {}
 
 storage = LocalStorageService()
 logger = logging.getLogger(__name__)
@@ -61,11 +59,3 @@ def mark_job_failed(job_id: str) -> None:
         job.status = JobStatus.FAILED
 
     logger.error("Job failed", extra={"job_id": job_id}, exc_info=True)
-
-
-def save_job_result(result: JobResult) -> None:
-    _RESULTS[result.job_id] = result
-
-
-def get_job_result(job_id: str) -> Optional[JobResult]:
-    return _RESULTS.get(job_id)

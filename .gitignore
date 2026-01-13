@@ -52,3 +52,6 @@ log.txt
 # ML model weights
 /model/
 *.pt
+
+# Local temp result bundles
+*.zip

@@ -1,11 +1,16 @@
 from fastapi import FastAPI
 import logging
 
+# Logging setup
+from app.core.logging import setup_logging
+setup_logging()
+
+
 from app.api.health import router as health_router
 from app.api.jobs import router as jobs_router
 from app.core.config import APP_ENV
 
-app = FastAPI(title="Spitting Detection Backend")
+app = FastAPI(title="Async Video Inference Backend")
 logger = logging.getLogger(__name__)
 
 

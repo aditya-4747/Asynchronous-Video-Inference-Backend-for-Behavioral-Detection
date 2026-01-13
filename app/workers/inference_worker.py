@@ -2,6 +2,7 @@ import cv2
 import logging
 
 from app.services import job_service
+from app.services import result_service
 from app.models.result import JobResult, Detection
 from app.services.job_service import storage
 from app.services.model_loader import ensure_model_present
@@ -30,26 +31,27 @@ def process_job(job_id: str):
 
         result_detections = []
 
-        for idx, (timestamp, conf, frame) in enumerate(detections, start=1):
+        for idx, (timestamp, frame, spitting_instances) in enumerate(detections, start=1):
             success, buffer = cv2.imencode(".jpg", frame)
             if not success:
                 continue
 
             frame_key = storage.upload_frame(
                 buffer.tobytes(),
-                filename = f"{job_id}_frame-{idx}.jpg"
+                job_id,
+                filename = f"frame-{idx}.jpg"
             )
 
             result_detections.append(
                 Detection(
                     timestamp = timestamp,
-                    confidence = conf,
+                    instances = spitting_instances,
                     frame_key = frame_key
                 )
             )
 
         result = JobResult(job_id = job_id, detections = result_detections)
-        job_service.save_job_result(result)
+        result_service.save_job_result(result)
         job_service.mark_job_completed(job_id)
 
     except Exception:
