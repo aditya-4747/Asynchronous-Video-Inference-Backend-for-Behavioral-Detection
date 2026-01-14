@@ -8,5 +8,6 @@ MODEL_DIR = os.getenv("MODEL_DIR", "model")
 DATA_DIR = os.getenv("DATA_DIR", "data")
 VIDEO_DIR = os.path.join(DATA_DIR, "videos")
 FRAME_DIR = os.path.join(DATA_DIR, "frames")
+TEMP_DIR = os.path.join(DATA_DIR, "temp")
 
 FRAME_INTERVAL = int(os.getenv("FRAME_INTERVAL", "30"))

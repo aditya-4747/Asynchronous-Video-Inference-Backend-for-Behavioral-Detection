@@ -43,6 +43,10 @@ def get_result(job_id: str):
 
 
 @router.get("/{job_id}/result/preview")
-def get_result_preview(job_id: str):
-    path = result_service.generate_preview(job_id)
-    return FileResponse(path, filename=f"{job_id}_results.zip")
+def get_result_preview(job_id: str, background_tasks: BackgroundTasks):
+    zip_path, temp_folder = result_service.generate_preview(job_id)
+
+    # Delete temp files
+    background_tasks.add_task(result_service.cleanup_temp_files, zip_path, temp_folder)
+
+    return FileResponse(zip_path, filename=f"{job_id}_results.zip", media_type="application/zip")
