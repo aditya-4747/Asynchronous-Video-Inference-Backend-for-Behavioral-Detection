@@ -11,3 +11,9 @@ FRAME_DIR = os.path.join(DATA_DIR, "frames")
 TEMP_DIR = os.path.join(DATA_DIR, "temp")
 
 FRAME_INTERVAL = int(os.getenv("FRAME_INTERVAL", "30"))
+
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = 6379
+QUEUE_NAME = "job_queue"
+
+DATABASE_URL = os.getenv("DATABASE_URL")

@@ -6,3 +6,7 @@ requests
 opencv-python-headless
 ultralytics
 numpy<2
+redis
+psycopg2-binary
+alembic
+sqlalchemy

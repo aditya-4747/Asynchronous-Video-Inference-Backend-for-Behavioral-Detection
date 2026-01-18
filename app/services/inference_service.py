@@ -1,8 +1,6 @@
 from ultralytics import YOLO
 import cv2
 
-from app.models.result import SpittingInstance
-
 class YoloInferenceService:
     def __init__(self, model_path: str):
         self.model = YOLO(model_path)
@@ -39,7 +37,7 @@ class YoloInferenceService:
 
                         if cls_id == 0 and conf > 0.6:
                             spitting_instances.append(
-                                SpittingInstance(conf=conf, box=[x1, y1, x2, y2])
+                                {"conf": conf, "box": [x1, y1, x2, y2]}
                             )
                 
                 if spitting_instances:

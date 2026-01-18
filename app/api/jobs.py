@@ -1,17 +1,16 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, File, UploadFile
+from fastapi import APIRouter, HTTPException, File, UploadFile
 from fastapi.responses import FileResponse
+from starlette.background import BackgroundTask
 
 from app.services import job_service
 from app.services import result_service
-from app.workers.inference_worker import process_job
+from app.core.redis_client import redis_client
+from app.core.config import QUEUE_NAME
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 @router.post("/create")
-def create_job(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...)
-):
+def create_job(file: UploadFile = File(...)):
     if file is None:
         raise HTTPException(status_code=400, detail="No file uploaded")
     if not file.filename:
@@ -20,8 +19,8 @@ def create_job(
         raise HTTPException(status_code=400, detail="Only video files are allowed")
     
     job = job_service.create_job(file.file, file.filename)
-    background_tasks.add_task(process_job, job.job_id)
 
+    redis_client.lpush(QUEUE_NAME, job.job_id)
     return job
 
 
@@ -43,10 +42,15 @@ def get_result(job_id: str):
 
 
 @router.get("/{job_id}/result/preview")
-def get_result_preview(job_id: str, background_tasks: BackgroundTasks):
+def get_result_preview(job_id: str):
     zip_path, temp_folder = result_service.generate_preview(job_id)
 
-    # Delete temp files
-    background_tasks.add_task(result_service.cleanup_temp_files, zip_path, temp_folder)
-
-    return FileResponse(zip_path, filename=f"{job_id}_results.zip", media_type="application/zip")
+    if zip_path == "" or temp_folder == "":
+        raise HTTPException(status_code=404, detail="Result not found")
+    
+    return FileResponse(
+        zip_path, 
+        filename=f"{job_id}_results.zip", 
+        media_type="application/zip",
+        background=BackgroundTask(result_service.cleanup_temp_files, zip_path, temp_folder)
+    )

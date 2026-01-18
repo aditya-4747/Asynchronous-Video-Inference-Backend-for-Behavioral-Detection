@@ -2,8 +2,7 @@ import logging
 import sys
 
 LOG_FORMAT = (
-    "%(asctime)s | %(levelname)s | %(name)s | "
-    "job_id=%(job_id)s | %(message)s"
+    "%(asctime)s | %(levelname)s | %(name)s | job_id=%(job_id)s | %(message)s"
 )
 
 class SafeFormatter(logging.Formatter):
