@@ -16,13 +16,17 @@ RUN pip install --no-cache-dir \
     --index-url https://download.pytorch.org/whl/cpu
 
 
-# Dependencies required by the app 
+# App dependencies 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY alembic.ini .
 COPY migrations/ migrations/
 COPY app/ app/
+
+# Model download
+RUN mkdir model
+RUN wget -O model/spitting-detection-model.pt https://github.com/aditya-4747/spitting-detection-system-streamlit-app/releases/download/v1.0-model/spitting_detection_model.pt
 
 ENV PYTHONUNBUFFERED=1
 

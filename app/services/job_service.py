@@ -1,13 +1,29 @@
 import uuid
 from typing import Optional
 import logging
+import magic
 
 from app.core.database import SessionLocal
 from app.models.job import JobStatus, Job
-from app.storage.local import LocalStorageService
+from app.storage import get_storage_service
 
-storage = LocalStorageService()
+storage = get_storage_service()
 logger = logging.getLogger(__name__)
+
+
+def get_video_extension(file_bytes: bytes) -> str:
+    mime = magic.from_buffer(file_bytes, mime=True)
+
+    allowed_types = {
+        "video/mp4": "mp4",
+        "video/x-matroska": "mkv",
+        "video/quicktime": "mov"
+    }
+
+    if mime not in allowed_types:
+        raise ValueError("Unsupported file type")
+    
+    return allowed_types[mime]
 
 
 def create_job(file, filename: str) -> Job:
@@ -15,9 +31,13 @@ def create_job(file, filename: str) -> Job:
 
     try:
         job_id = str(uuid.uuid4())
-        video_path = storage.upload_video(file, filename)
+        file_bytes = file.read()
+        ext = get_video_extension(file_bytes)
 
-        job = Job(job_id=job_id, video_key=video_path)
+        filename = f"{job_id}.{ext.lower()}"
+        storage.upload_video(file_bytes, filename)
+
+        job = Job(job_id=job_id, video_key=filename)
         db.add(job)
         db.commit()
         db.refresh(job)

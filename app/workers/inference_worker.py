@@ -1,5 +1,6 @@
 import cv2
 import logging
+import os
 
 from app.services import job_service
 from app.core.database import SessionLocal
@@ -8,28 +9,27 @@ from app.models.detection import Detection
 from app.services.job_service import storage
 from app.services.model_loader import ensure_model_present
 from app.services.inference_service import YoloInferenceService
-from app.core.config import FRAME_INTERVAL
+from app.core.config import FRAME_INTERVAL, TEMP_DIR
+from app.infrastructure.s3_client import download_file
 
-MODEL_PATH = ensure_model_present()
-inference_service = YoloInferenceService(MODEL_PATH)
+model_path = ensure_model_present()
+inference_service = YoloInferenceService(model_path)
 logger = logging.getLogger(__name__)
 
 
 def process_job(job_id: str):
-    logger.info("Worker started job processing", extra={"job_id": job_id})
     db = SessionLocal()
 
     try:
         job_service.mark_job_processing(job_id)
 
         job = job_service.get_job(job_id)
-        video_path = storage.get_access_url(job.video_key)
-        
-        detections = inference_service.run(video_path, FRAME_INTERVAL)
-        logger.info(
-            "Inference completed", 
-            extra={"job_id": job_id, "detections": len(detections)}
-        )
+        video_path = f"uploads/{job.video_key}"
+        os.makedirs(TEMP_DIR, exist_ok=True)
+        local_path = os.path.join(TEMP_DIR, job.video_key)
+        download_file(video_path, local_path)
+
+        detections = inference_service.run(local_path, FRAME_INTERVAL)
 
         for idx, (timestamp, frame, spitting_instances) in enumerate(detections, start=1):
             success, buffer = cv2.imencode(".jpg", frame)
@@ -77,4 +77,5 @@ def process_job(job_id: str):
         job_service.mark_job_failed(job_id)
 
     finally:
+        os.remove(local_path)
         db.close()

@@ -1,3 +1,5 @@
+python-magic-bin
+dotenv
 fastapi
 uvicorn
 pydantic
@@ -6,7 +8,7 @@ requests
 opencv-python-headless
 ultralytics
 numpy<2
-redis
+boto3
 psycopg2-binary
 alembic
 sqlalchemy

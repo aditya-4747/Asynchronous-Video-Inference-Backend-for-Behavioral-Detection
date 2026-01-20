@@ -14,11 +14,6 @@ services:
       timeout: 3s
       retries: 10
 
-  redis:
-    image: redis:7
-    ports:
-      - 6379:6379
-
   migrate:
     build: .
     command: alembic upgrade head
@@ -38,7 +33,6 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      REDIS_HOST: ${REDIS_HOST}
     volumes:
       - shared-data:/app/data
 
@@ -50,7 +44,6 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      REDIS_HOST: ${REDIS_HOST}
     volumes:
       - shared-data:/app/data
 
